@@ -6,62 +6,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.3.1/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/kt-2.6.1/r-2.2.7/sp-1.2.2/datatables.min.css"/>
+    
+    <style>
+        .canvas, .tabke{
+            position: relative; 
+            width:100%;          
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>    
+ 
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.3.1/jszip-2.5.0/dt-1.10.24/af-2.3.6/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/kt-2.6.1/r-2.2.7/sp-1.2.2/datatables.min.js"></script>
+
     <script type="text/javascript">
-
-    window.onload = function () {
-        var chart1 = new CanvasJS.Chart("chartContainer1", {
-            title:{
-                text: "My First Chart in CanvasJS"              
-            },
-            data: [              
-            {
-                // Change type to "doughnut", "line", "splineArea", etc.
-                type: "column",
-                dataPoints: [
-                    { label: "apple",  y: 10  },
-                    { label: "orange", y: 15  },
-                    { label: "banana", y: 25  },
-                    { label: "mango",  y: 30  },
-                    { label: "grape",  y: 28  }
+        window.onload = function () {                       
+            const globalData = {
+                labels:  [
+                    "Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.", 
+                    "Penses que la manera d'avaluar és l'adequada?", 
+                    "Penses que el que has après pot ser útil a la teva futura vida professional?", 
+                    "Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)"
+                ],
+                datasets: [
+                    {
+                        data:  [9.75, 8.25, 7, 9],
+                        backgroundColor: [
+                        'rgb(255, 99, 132, 0.25)',
+                        'rgb(75, 192, 192, 0.25)',
+                        'rgb(255, 205, 86, 0.25)',
+                        'rgb(54, 162, 235, 0.25)'
+                        ]
+                    }
                 ]
+            };
+
+            const totalData = {
+                labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                datasets: [
+                    {
+                        label: "Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.",
+                        data:  [0, 0, 0, 1, 0, 2, 7, 5, 3],
+                        backgroundColor: 'rgb(255, 99, 132, 0.25)',
+                        borderColor: 'rgb(255, 99, 132, 0.25)'
+                    },
+                    {
+                        label: "Penses que la manera d'avaluar és l'adequada?", 
+                        data:  [0, 1, 0, 0, 0, 3, 6, 3, 4],
+                        backgroundColor: 'rgb(75, 192, 192, 0.25)',
+                        borderColor: 'rgb(75, 192, 192, 0.25)'
+                    },
+                    {
+                        label: "Penses que el que has après pot ser útil a la teva futura vida professional?", 
+                        data:  [0, 0, 0, 0, 0, 3, 4, 8, 1],
+                        backgroundColor: 'rgb(255, 205, 86, 0.25)',
+                        borderColor: 'rgb(255, 205, 86, 0.25)'
+                    },
+                    {
+                        label: "Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)",
+                        data:  [0, 1, 0,2, 0, 2, 2, 9, 1],
+                        backgroundColor: 'rgb(54, 162, 235, 0.25)',
+                        borderColor: 'rgb(54, 162, 235, 0.25)'
+                    }
+                ]
+            };
+
+            const globalConfig = {
+                type: 'polarArea',
+                data: globalData,                
+                options: {                    
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            fullSize: false,
+                            maxWidth: 1000
+                        }
+                    }
+                },
+            };
+
+            const totalConfig = {
+                type: 'line',
+                data: totalData,                
+                options: {                    
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x:{
+                            title: {
+                                display: true,
+                                text: 'Puntuació'
+                            }
+                        },
+                        y:{
+                            title: {
+                                display: true,
+                                text: 'Quantitat'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            fullSize: false,
+                            maxWidth: 1000
+                        }
+                    }
+                },
+            };
+            
+            var globalChart = new Chart(document.getElementById('globalChart'), globalConfig);
+            var totalChart = new Chart(document.getElementById('totalChart'), totalConfig);
+        };
+
+        var dataSet = [            
+            {                
+                "value": "This is a demo comment (1)."
+            },
+            {                
+                "value": "This is a demo comment (2)."
+            },
+            {                
+                "value": "This is a demo comment (3)."
             }
-            ]
-        });
-        chart1.render();
+        ];
 
-        var chart2 = new CanvasJS.Chart("chartContainer2", {
-            theme: "light2", // "light1", "light2", "dark1", "dark2"
-            exportEnabled: true,
-            animationEnabled: true,
-            title: {
-                text: "Desktop Browser Market Share in 2016"
-            },
-            data: [{
-                type: "pie",
-                startAngle: 25,
-                toolTipContent: "<b>{label}</b>: {y}%",
-                showInLegend: "true",
-                legendText: "{label}",
-                indexLabelFontSize: 16,
-                indexLabel: "{label} - {y}%",
-                dataPoints: [
-                    { y: 51.08, label: "Chrome" },
-                    { y: 27.34, label: "Internet Explorer" },
-                    { y: 10.62, label: "Firefox" },
-                    { y: 5.02, label: "Microsoft Edge" },
-                    { y: 4.07, label: "Safari" },
-                    { y: 1.22, label: "Opera" },
-                    { y: 0.44, label: "Others" }
+        $(document).ready(function() {                        
+            $('#table').DataTable({
+                data: dataSet,
+                columns: [                                     
+                    { data: "value" }
                 ]
-            }]
-        });
-        chart2.render();
-    }
+            });
+        });      
     </script>
 </head>
 <body>
-    <div id="chartContainer1" style="height: 300px; width: 100%;"></div>
-    <div id="chartContainer2" style="height: 370px; width: 100%;"></div>
+    <h1>DAM</h1>
+    <h2>MP04: Llenguatges de marques i sistemes de gestió d'informació</h2>
+
+    <h3>Valoracions globals</h3>
+    <div class="canvas">
+        <canvas id="globalChart"></canvas>
+    </div>
+
+    <h3>Valoracions totals</h3>    
+    <div class="canvas">
+        <canvas id="totalChart"></canvas>
+    </div>
+
+    <h3>Comentaris</h3>
+    <div class="table">
+        <table id="table">
+            <thead>
+                <tr>              
+                    <th>Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)</th>                    
+                </tr>
+            </thead>            
+        </table>
+    </div>
+    
 </body>
 </html>
