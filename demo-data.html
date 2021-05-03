@@ -53,15 +53,22 @@
         ];
         
         $(document).ready(function() {
+            // Setup - add a text input to each footer cell
+            $('#example tfoot th').each( function () {
+                var title = $(this).text();
+                $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+            } )
+            
             $('#example').DataTable( {
                 data: dataSet,                
                 colReorder: true,
                 autoFill: true,
                 keys: true,
-                responsive: true,
+                responsive: true,   
+                dom: 'Bfrtip',
                 buttons: [
                     'copy', 'excel', 'pdf'
-                ],
+                ],           
                 columns: [
                     { title: "Name" },
                     { title: "Position" },
@@ -69,12 +76,45 @@
                     { title: "Extn." },
                     { title: "Start date" },
                     { title: "Salary" }
-                ]
+                ],
+                initComplete: function () {
+                    var r = $('#example tfoot tr');
+                    r.find('th').each(function(){
+                        $(this).css('padding', 8);
+                    });
+                    
+                    $('#example thead').append(r);
+                    $('#search_0').css('text-align', 'center');
+
+                    // Apply the search
+                    this.api().columns().every( function () {
+                        var that = this;
+        
+                        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+                            if ( that.search() !== this.value ) {
+                                that
+                                    .search( this.value )
+                                    .draw();
+                            }
+                        } );
+                    } );
+                }
             } );
         } );
     </script>
 </head>
 <body>
-    <table id="example" class="display" width="100%"></table>
+    <table id="example" class="display" width="100%">
+        <tfoot>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Age</th>
+                <th>Start date</th>
+                <th>Salary</th>
+            </tr>
+        </tfoot>
+    </table>
 </body>
 </html>
