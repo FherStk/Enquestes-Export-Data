@@ -10,7 +10,7 @@
     <script type="text/javascript">
 
     window.onload = function () {
-        var chart = new CanvasJS.Chart("chartContainer", {
+        var chart1 = new CanvasJS.Chart("chartContainer1", {
             title:{
                 text: "My First Chart in CanvasJS"              
             },
@@ -28,11 +28,40 @@
             }
             ]
         });
-        chart.render();
+        chart1.render();
+
+        var chart2 = new CanvasJS.Chart("chartContainer2", {
+            theme: "light2", // "light1", "light2", "dark1", "dark2"
+            exportEnabled: true,
+            animationEnabled: true,
+            title: {
+                text: "Desktop Browser Market Share in 2016"
+            },
+            data: [{
+                type: "pie",
+                startAngle: 25,
+                toolTipContent: "<b>{label}</b>: {y}%",
+                showInLegend: "true",
+                legendText: "{label}",
+                indexLabelFontSize: 16,
+                indexLabel: "{label} - {y}%",
+                dataPoints: [
+                    { y: 51.08, label: "Chrome" },
+                    { y: 27.34, label: "Internet Explorer" },
+                    { y: 10.62, label: "Firefox" },
+                    { y: 5.02, label: "Microsoft Edge" },
+                    { y: 4.07, label: "Safari" },
+                    { y: 1.22, label: "Opera" },
+                    { y: 0.44, label: "Others" }
+                ]
+            }]
+        });
+        chart2.render();
     }
     </script>
 </head>
 <body>
-    <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+    <div id="chartContainer1" style="height: 300px; width: 100%;"></div>
+    <div id="chartContainer2" style="height: 370px; width: 100%;"></div>
 </body>
 </html>
