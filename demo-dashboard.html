@@ -9,9 +9,60 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.3.1/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/kt-2.6.1/r-2.2.7/sp-1.2.2/datatables.min.css"/>
     
     <style>
-        .canvas, .tabke{
+        body{
+            background-color: whitesmoke;
+        }
+
+        body, h1{
+            padding: 0px;
+            margin: 0px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+
+        header{
+            background-color: #ad0050;
+            color: white;
+            padding: 10px;
+        }
+       
+        h2{
+            font-weight: normal;
+        }
+
+        .canvas, .table{
             position: relative; 
             width:100%;          
+        }
+
+        .canvas{
+            padding-bottom: 20px;
+        }
+
+        .box{
+            width: calc(50% - 32px);
+            border: solid 1px grey;
+            box-shadow: 1px 1px 10px #888888;
+            border-radius: 5px;
+            margin: 10px;
+            padding-left: 10px;
+            background-color: white;
+            float: left;
+        }
+
+        .left{
+            float: left;
+        }
+
+        .right{
+            float: right;
+        }
+
+        .box h3{
+            margin-top: 10px;
+        }
+
+        .box ol{
+            padding-left: 20px;
         }
     </style>
 
@@ -25,10 +76,10 @@
         window.onload = function () {                       
             const globalData = {
                 labels:  [
-                    "Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.", 
-                    "Penses que la manera d'avaluar és l'adequada?", 
-                    "Penses que el que has après pot ser útil a la teva futura vida professional?", 
-                    "Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)"
+                    "Pregunta 1", 
+                    "Pregunta 2", 
+                    "Pregunta 3", 
+                    "Pregunta 4", 
                 ],
                 datasets: [
                     {
@@ -73,23 +124,34 @@
                 ]
             };
 
-            const globalConfig = {
+            var commentsData = [            
+                {                
+                    "value": "This is a demo comment (1)."
+                },
+                {                
+                    "value": "This is a demo comment (2)."
+                },
+                {                
+                    "value": "This is a demo comment (3)."
+                }
+            ];
+
+          
+            var globalChart = new Chart(document.getElementById('globalChart'), {
                 type: 'polarArea',
                 data: globalData,                
                 options: {                    
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right',
-                            fullSize: false,
-                            maxWidth: 1000
+                            position: 'left'
                         }
                     }
                 },
-            };
+            });
 
-            const totalConfig = {
+            var totalChart = new Chart(document.getElementById('totalChart'), {
                 type: 'line',
                 data: totalData,                
                 options: {                    
@@ -117,42 +179,40 @@
                         }
                     }
                 },
-            };
-            
-            var globalChart = new Chart(document.getElementById('globalChart'), globalConfig);
-            var totalChart = new Chart(document.getElementById('totalChart'), totalConfig);
-        };
+            });
 
-        var dataSet = [            
-            {                
-                "value": "This is a demo comment (1)."
-            },
-            {                
-                "value": "This is a demo comment (2)."
-            },
-            {                
-                "value": "This is a demo comment (3)."
-            }
-        ];
-
-        $(document).ready(function() {                        
             $('#table').DataTable({
-                data: dataSet,
+                data: commentsData,
                 columns: [                                     
                     { data: "value" }
                 ]
             });
-        });      
+        };         
     </script>
 </head>
 <body>
-    <h1>DAM</h1>
-    <h2>MP04: Llenguatges de marques i sistemes de gestió d'informació</h2>
+    <header>
+        <h1>DAM</h1>
+        <h2>MP04: Llenguatges de marques i sistemes de gestió d'informació</h2>
+    </header>
 
-    <h3>Valoracions globals</h3>
-    <div class="canvas">
-        <canvas id="globalChart"></canvas>
+    <div class="box left">
+        <h3>Preguntes</h3>
+        <ol>
+            <li>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
+            <li>Penses que la manera d'avaluar és l'adequada?</li>
+            <li>Penses que el que has après pot ser útil a la teva futura vida professional?</li>
+            <li>Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)</li>
+        </ol>
     </div>
+
+    <div class="box right">
+        <h3>Valoracions globals</h3>
+        <div class="canvas">
+            <canvas id="globalChart"></canvas>
+        </div>
+    </div>
+
 
     <h3>Valoracions totals</h3>    
     <div class="canvas">
