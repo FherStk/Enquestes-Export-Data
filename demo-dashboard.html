@@ -196,19 +196,10 @@
 
             function legendClickCallback(legendItemIndex){
                 document.querySelectorAll('canvas').forEach((chartItem,index)=>{
-                    debugger; 
                     var chart = Chart.instances[index];
-                    var dataItem = chart.data.datasets[legendItemIndex];
-
-                    //TODO: chart.data.datasets works for line but not for disc
-                    
-                    if(dataItem.hidden == true || dataItem.hidden == null){
-                        dataItem.hidden = false;
-                    } else {
-                        dataItem.hidden = true;
-                    }
-
-                    chart.update();
+                    if(chart.config.type == "polarArea") chart.toggleDataVisibility(legendItemIndex);
+                    else  chart.data.datasets[legendItemIndex].hidden = !(chart.data.datasets[legendItemIndex].hidden ?? false);                    
+                    chart.update();                    
                 });  
             }
         };         
@@ -222,6 +213,7 @@
 
     <div class="box left">
         <h3>Preguntes</h3>
+        <!-- TODO: legend colors and check or striked out -->
         <ol id="legend">
             <li>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
             <li>Penses que la manera d'avaluar és l'adequada?</li>
