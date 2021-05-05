@@ -98,25 +98,25 @@
                 labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                 datasets: [
                     {
-                        label: "Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.",
+                        label: "Pregunta 1",
                         data:  [0, 0, 0, 1, 0, 2, 7, 5, 3],
                         backgroundColor: 'rgb(255, 99, 132, 0.25)',
                         borderColor: 'rgb(255, 99, 132, 0.25)'
                     },
                     {
-                        label: "Penses que la manera d'avaluar és l'adequada?", 
+                        label: "Pregunta 2", 
                         data:  [0, 1, 0, 0, 0, 3, 6, 3, 4],
                         backgroundColor: 'rgb(75, 192, 192, 0.25)',
                         borderColor: 'rgb(75, 192, 192, 0.25)'
                     },
                     {
-                        label: "Penses que el que has après pot ser útil a la teva futura vida professional?", 
+                        label: "Pregunta 3", 
                         data:  [0, 0, 0, 0, 0, 3, 4, 8, 1],
                         backgroundColor: 'rgb(255, 205, 86, 0.25)',
                         borderColor: 'rgb(255, 205, 86, 0.25)'
                     },
                     {
-                        label: "Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)",
+                        label: "Pregunta 4",
                         data:  [0, 1, 0,2, 0, 2, 2, 9, 1],
                         backgroundColor: 'rgb(54, 162, 235, 0.25)',
                         borderColor: 'rgb(54, 162, 235, 0.25)'
@@ -145,7 +145,8 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'left'
+                            //position: 'left'
+                            display: false
                         }
                     }
                 },
@@ -167,15 +168,14 @@
                         y:{
                             title: {
                                 display: true,
-                                text: 'Quantitat'
+                                text: 'Quantitat de valoracions'
                             }
                         }
                     },
                     plugins: {
                         legend: {
-                            position: 'right',
-                            fullSize: false,
-                            maxWidth: 1000
+                            //position: 'right'
+                            display: false
                         }
                     }
                 },
@@ -187,6 +187,30 @@
                     { data: "value" }
                 ]
             });
+            
+            var legendItems = document.querySelector('#legend').getElementsByTagName('li');
+
+            for (var i = 0; i < legendItems.length; i++) {
+                legendItems[i].addEventListener("click", legendClickCallback.bind(this,i), false);
+            }
+
+            function legendClickCallback(legendItemIndex){
+                document.querySelectorAll('canvas').forEach((chartItem,index)=>{
+                    debugger; 
+                    var chart = Chart.instances[index];
+                    var dataItem = chart.data.datasets[legendItemIndex];
+
+                    //TODO: chart.data.datasets works for line but not for disc
+                    
+                    if(dataItem.hidden == true || dataItem.hidden == null){
+                        dataItem.hidden = false;
+                    } else {
+                        dataItem.hidden = true;
+                    }
+
+                    chart.update();
+                });  
+            }
         };         
     </script>
 </head>
@@ -198,7 +222,7 @@
 
     <div class="box left">
         <h3>Preguntes</h3>
-        <ol>
+        <ol id="legend">
             <li>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
             <li>Penses que la manera d'avaluar és l'adequada?</li>
             <li>Penses que el que has après pot ser útil a la teva futura vida professional?</li>
@@ -213,10 +237,11 @@
         </div>
     </div>
 
-
-    <h3>Valoracions totals</h3>    
-    <div class="canvas">
-        <canvas id="totalChart"></canvas>
+    <div class="box left">
+        <h3>Valoracions totals</h3>
+        <div class="canvas">
+            <canvas id="totalChart"></canvas>
+        </div>
     </div>
 
     <h3>Comentaris</h3>
