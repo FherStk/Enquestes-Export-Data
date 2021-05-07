@@ -63,7 +63,30 @@
 
         .box ol{
             padding-left: 20px;
+            margin-left: 40px;
         }
+
+        .box li{
+            cursor: pointer;
+        }
+
+        .box li:hover{
+            color: darkgray;
+        }
+
+        .box li.cross{
+            text-decoration: line-through;
+        }
+
+        .box li .icon{
+            width: 28px;
+            height: 10px;
+            background-color: red;
+            position: relative;
+            display: inline-block;
+            margin-left: -60px;
+            margin-right: 35px;
+        }        
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>    
@@ -195,6 +218,9 @@
             }
 
             function legendClickCallback(legendItemIndex){
+                var legendItem = document.querySelector('#legend').getElementsByTagName('li')[legendItemIndex];
+                legendItem.classList.toggle("cross");
+
                 document.querySelectorAll('canvas').forEach((chartItem,index)=>{
                     var chart = Chart.instances[index];
                     if(chart.config.type == "polarArea") chart.toggleDataVisibility(legendItemIndex);
@@ -215,10 +241,10 @@
         <h3>Preguntes</h3>
         <!-- TODO: legend colors and check or striked out -->
         <ol id="legend">
-            <li>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
-            <li>Penses que la manera d'avaluar és l'adequada?</li>
-            <li>Penses que el que has après pot ser útil a la teva futura vida professional?</li>
-            <li>Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)</li>
+            <li><div class="icon" style="background-color: rgb(255, 99, 132, 0.25);"></div>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
+            <li><div class="icon" style="background-color: rgb(75, 192, 192, 0.25);"></div>Penses que la manera d'avaluar és l'adequada?</li>
+            <li><div class="icon" style="background-color: rgb(255, 205, 86, 0.25);"></div>Penses que el que has après pot ser útil a la teva futura vida professional?</li>
+            <li><div class="icon" style="background-color: rgb(54, 162, 235, 0.25);"></div>Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)</li>
         </ol>
     </div>
 
