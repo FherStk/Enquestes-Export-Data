@@ -39,12 +39,12 @@
         }
 
         .box{
-            width: calc(50% - 32px);
+            width: calc(50% - 42px);
             border: solid 1px grey;
             box-shadow: 1px 1px 10px #888888;
             border-radius: 5px;
             margin: 10px;
-            padding-left: 10px;
+            padding: 0px 10px 10px 10px;
             background-color: white;
             float: left;
         }
@@ -57,8 +57,18 @@
             float: right;
         }
 
+        .full{
+            width: calc(100% - 42px);
+            padding: 0px 10px 10px 10px;
+        }
+
         .clear{
             clear: both;
+        }
+
+        .content{
+            width: 100%;
+            display: flex;
         }
 
         .box h3{
@@ -242,7 +252,7 @@
         <h2>MP04: Llenguatges de marques i sistemes de gestió d'informació</h2>
     </header>
 
-    <div class="box left">
+    <div class="box full">
         <h3>Preguntes</h3>
         <ol id="legend">
             <li><div class="icon" style="background-color: rgb(255, 99, 132, 0.25);"></div>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
@@ -252,17 +262,19 @@
         </ol>
     </div>
 
-    <div class="box right">
-        <h3>Valoracions totals</h3>
-        <div class="canvas">
-            <canvas id="totalChart"></canvas>
+    <div class="content">    
+        <div class="box left">
+            <h3>Valoracions totals</h3>
+            <div class="canvas">
+                <canvas id="totalChart"></canvas>
+            </div>
         </div>
-    </div>
 
-    <div class="box left">
-        <h3>Valoracions globals</h3>
-        <div class="canvas">
-            <canvas id="globalChart"></canvas>
+        <div class="box right">
+            <h3>Valoracions globals</h3>
+            <div class="canvas">
+                <canvas id="globalChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -271,17 +283,18 @@
 
     <div class="clear"></div>
   
-
-    <h3>Comentaris</h3>
-    <div class="table">
-        <table id="table">
-            <thead>
-                <tr>              
-                    <th>Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)</th>                    
-                </tr>
-            </thead>            
-        </table>
-    </div>
+    <div class="box full">
+        <h3>Comentaris</h3>
+        <div class="table">
+            <table id="table">
+                <thead>
+                    <tr>              
+                        <th>Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)</th>                    
+                    </tr>
+                </thead>            
+            </table>
+        </div>
+    </div>  
     
 </body>
 </html>
