@@ -57,6 +57,10 @@
             float: right;
         }
 
+        .clear{
+            clear: both;
+        }
+
         .box h3{
             margin-top: 10px;
         }
@@ -86,7 +90,8 @@
             display: inline-block;
             margin-left: -60px;
             margin-right: 35px;
-        }        
+        }     
+                   
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>    
@@ -239,7 +244,6 @@
 
     <div class="box left">
         <h3>Preguntes</h3>
-        <!-- TODO: legend colors and check or striked out -->
         <ol id="legend">
             <li><div class="icon" style="background-color: rgb(255, 99, 132, 0.25);"></div>Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.</li>
             <li><div class="icon" style="background-color: rgb(75, 192, 192, 0.25);"></div>Penses que la manera d'avaluar és l'adequada?</li>
@@ -249,18 +253,24 @@
     </div>
 
     <div class="box right">
+        <h3>Valoracions totals</h3>
+        <div class="canvas">
+            <canvas id="totalChart"></canvas>
+        </div>
+    </div>
+
+    <div class="box left">
         <h3>Valoracions globals</h3>
         <div class="canvas">
             <canvas id="globalChart"></canvas>
         </div>
     </div>
 
-    <div class="box left">
-        <h3>Valoracions totals</h3>
-        <div class="canvas">
-            <canvas id="totalChart"></canvas>
-        </div>
-    </div>
+    <!-- TODO: left-side height = right-side height -->
+    <!-- TODO: responsive: min viewport needed to float right, otherwise everything is floating left -->
+
+    <div class="clear"></div>
+  
 
     <h3>Comentaris</h3>
     <div class="table">
