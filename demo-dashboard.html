@@ -14,7 +14,8 @@
             padding-bottom: 10px;
         }
 
-        body, h1{            
+        body, 
+        h1{            
             margin: 0px;
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         }
@@ -33,7 +34,8 @@
             font-weight: normal;
         }
 
-        .canvas, .table{
+        .canvas, 
+        .table{
             position: relative; 
             width:100%;          
         }
@@ -106,7 +108,32 @@
             display: inline-block;
             margin-left: -60px;
             margin-right: 35px;
-        }     
+        }    
+
+        .hide table,
+        .hide #data_filter,
+        .hide #data_info,
+        .hide #data_paginate{
+            display: none;
+        }
+
+        .hide .dt-buttons{
+            margin-left: 10px;
+        }   
+
+        @media only screen and (max-width: 800px) {
+            .content{
+                display: inline;
+            }
+
+            .left,
+            .right {
+                float: none;
+                display: block;
+                margin:10px;
+                width: calc(100% - 42px);
+            }
+        }   
                    
     </style>
 
@@ -168,15 +195,27 @@
                 ]
             };
 
-            var commentsData = [            
+            var fullData = [            
                 {                
-                    "value": "This is a demo comment (1)."
+                    "degree": "This is a demo comment (1).",
+                    "subject_code": "This is a demo comment (1).",
+                    "subject_name": "This is a demo comment (1).",
+                    "question_statement": "This is a demo comment (1).",
+                    "value": "This is a demo comment (1).",
                 },
                 {                
-                    "value": "This is a demo comment (2)."
+                    "degree": "This is a demo comment (2).",
+                    "subject_code": "This is a demo comment (2).",
+                    "subject_name": "This is a demo comment (2).",
+                    "question_statement": "This is a demo comment (2).",
+                    "value": "This is a demo comment (2).",
                 },
                 {                
-                    "value": "This is a demo comment (3)."
+                    "degree": "This is a demo comment (3).",
+                    "subject_code": "This is a demo comment (3).",
+                    "subject_name": "This is a demo comment (3).",
+                    "question_statement": "This is a demo comment (3).",
+                    "value": "This is a demo comment (3).",
                 }
             ];
 
@@ -226,10 +265,32 @@
             });
 
             $('#table').DataTable({
-                data: commentsData,
+                data: fullData,
                 columns: [                                     
-                    { data: "value" }
-                ]
+                    {data: "value"}
+                ]          
+            });
+
+            var table = $('#data').DataTable({
+                data: fullData,
+                columns: [                                     
+                    {data: "degree"},
+                    {data: "subject_code"},
+                    {data: "subject_name"},
+                    {data: "question_statement"},
+                    {data: "value"}
+                ],
+                "columnDefs": [
+                    {
+                        "targets": [ 1 ],
+                        "visible": false,
+                        "searchable": false
+                    }
+                ],
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'excel', 'pdf'
+                ],            
             });
             
             var legendItems = document.querySelector('#legend').getElementsByTagName('li');
@@ -284,7 +345,6 @@
         </div>
     </div>
 
-    <!-- TODO: left-side height = right-side height -->
     <!-- TODO: responsive: min viewport needed to float right, otherwise everything is floating left -->
 
     <div class="clear"></div>
@@ -292,15 +352,30 @@
     <div class="box full">
         <h3>Comentaris</h3>
         <div class="table">
-            <table id="table">
+            <table id="table" style="width:100%">   <!-- inline needed to allow responsive behaviour -->
                 <thead>
                     <tr>              
                         <th>Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)</th>                    
-                    </tr>
+                    </tr>                    
                 </thead>            
             </table>
         </div>
     </div>  
+    
+    <div class="box hide full">
+        <h3>Exportació de dades </h3>
+        <table id="data">
+            <thead>
+                <tr>              
+                    <th>degree</th>
+                    <th>subject_code</th>
+                    <th>subject_name</th>
+                    <th>question_statement</th>
+                    <th>value</th>
+                </tr>                    
+            </thead>            
+        </table>
+    </div>
     
 </body>
 </html>
