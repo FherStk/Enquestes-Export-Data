@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 from random import randrange
+import psycopg2
 import sys
 
 course_code = ""
@@ -20,11 +21,26 @@ total_graph = []
 
 def load_data():
     global course_code, mp_code, mp_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns
+    
+    conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes-real")
+    cursor = conn.cursor()
+
+    subject_id = 31 #should be an input argument
+    query = f"""
+                SELECT sub.code AS subject_code, sub.name AS subject_name, deg.code AS degree_code, deg.name AS degree_name 
+                FROM master.subject sub
+	                LEFT JOIN master.degree deg ON deg.id = sub.degree_id
+	            WHERE sub.id= {subject_id}
+            """
+
+    cursor.execute(query)
+    subject_data = cursor.fetchone()
 
     #TODO: load the data from the database
-    course_code = "DAM"
-    mp_code = "MPxx"
-    mp_name = "Llenguatge de marques"
+    course_code = subject_data[2]
+    mp_code = subject_data[0]
+    mp_name = subject_data[1]
+    
     global_data = ["9.75","8.25","7","9"]
     comment_caption = "Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)"
 
