@@ -175,7 +175,7 @@ def setup_data():
     #legend html list items
     legend_list = []
     for i in range(len(legend_text)):
-        legend_summary.append(f"<div class=""icon"" style=""background-color: {legend_colors[o]};""></div>{legend_text[i]}")
+        legend_list.append(f"<div class='icon' style='background-color: {legend_colors[i]};'></div>{legend_text[i]}")
 
     #total data graph
     total_graph = []
