@@ -25,6 +25,7 @@ def load_data():
     conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes-real")
     cursor = conn.cursor()
 
+    #LOADING MAIN COURSE DATA
     subject_id = 31 #should be an input argument
     query = f"""
                 SELECT sub.code AS subject_code, sub.name AS subject_name, deg.code AS degree_code, deg.name AS degree_name 
@@ -34,23 +35,48 @@ def load_data():
             """
 
     cursor.execute(query)
-    subject_data = cursor.fetchone()
+    data = cursor.fetchone()
 
     #TODO: load the data from the database
-    course_code = subject_data[2]
-    mp_code = subject_data[0]
-    mp_name = subject_data[1]
+    course_code = data[2]
+    mp_code = data[0]
+    mp_name = data[1]
+
+    #LOADING GLOBAL DATA
+    query = f"""
+            SELECT question_statement, SUM(CAST(value AS INTEGER))/COUNT(question_statement) AS "value", question_sort FROM reports.answer
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric'
+            GROUP BY question_statement, question_sort
+            ORDER BY question_sort
+        """
+
+    cursor.execute(query)
+    data = cursor.fetchall()    
     
-    global_data = ["9.75","8.25","7","9"]
-    comment_caption = "Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)"
+    legend_text = []
+    global_data = []
 
-    legend_text = [
-        "Avalua la metodologia d'aprenentatge, l'organització de la classe i l'assistència rebuda.",
-        "Penses que la manera d'avaluar és l'adequada?",
-        "Penses que el que has après pot ser útil a la teva futura vida professional?",
-        "Penses que el material triat pel professor és l'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)"
-    ]
+    for row in data:
+        legend_text.append(row[0])
+        global_data.append(row[1])                
 
+    query = f"SELECT DISTINCT question_statement FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Text'"
+    cursor.execute(query)
+    comment_caption = cursor.fetchone()[0]
+
+    #LOADING TOTAL DATA
+    #TODO: this query is not correct... must get how many questions has been aswered and its scores.
+    # total_data = []
+    # for row in data:
+    #     query = f"""
+    #             SELECT SUM(CAST(value AS INTEGER))/COUNT(question_sort) AS "value" FROM reports.answer
+    #             WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND question_sort={row[2]}
+    #             GROUP BY question_sort
+    #         """
+    #     cursor.execute(query)
+    #     total_data.append(cursor.fetchone()[0])
+
+    #LOADING TOTAL DATA
     total_data = [
         "[0, 0, 0, 1, 0, 2, 7, 5, 3]",
         "[0, 1, 0, 0, 0, 3, 6, 3, 4]",
