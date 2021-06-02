@@ -19,14 +19,13 @@ legend_summary = []
 legend_list = []
 total_graph = []
 
-def load_data():
+def load_data(subject_id):
     global course_code, mp_code, mp_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns
     
     conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes-real")
     cursor = conn.cursor()
 
-    #LOADING MAIN COURSE DATA
-    subject_id = 31 #should be an input argument
+    #LOADING MAIN COURSE DATA    
     query = f"""
                 SELECT sub.code AS subject_code, sub.name AS subject_name, deg.code AS degree_code, deg.name AS degree_name 
                 FROM master.subject sub
@@ -37,12 +36,11 @@ def load_data():
     cursor.execute(query)
     data = cursor.fetchone()
 
-    #TODO: load the data from the database
     course_code = data[2]
     mp_code = data[0]
     mp_name = data[1]
 
-    #LOADING GLOBAL DATA
+    #LOADING GLOBAL SCORING DATA (score average per question)
     query = f"""
             SELECT question_statement, SUM(CAST(value AS INTEGER))/COUNT(question_statement) AS "value", question_sort FROM reports.answer
             WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric'
@@ -64,117 +62,64 @@ def load_data():
     cursor.execute(query)
     comment_caption = cursor.fetchone()[0]
 
-    #LOADING TOTAL DATA
-    #TODO: this query is not correct... must get how many questions has been aswered and its scores.
-    # total_data = []
-    # for row in data:
-    #     query = f"""
-    #             SELECT SUM(CAST(value AS INTEGER))/COUNT(question_sort) AS "value" FROM reports.answer
-    #             WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND question_sort={row[2]}
-    #             GROUP BY question_sort
-    #         """
-    #     cursor.execute(query)
-    #     total_data.append(cursor.fetchone()[0])
-
-    #LOADING TOTAL DATA
-    total_data = [
-        "[0, 0, 0, 1, 0, 2, 7, 5, 3]",
-        "[0, 1, 0, 0, 0, 3, 6, 3, 4]",
-        "[0, 0, 0, 0, 0, 3, 4, 8, 1]",
-        "[0, 1, 0,2, 0, 2, 2, 9, 1]"
-    ]
+    #LOADING TOTAL DATA (amount of scores per question)
+    total_data = []
+    question_sort = 1
+    question_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     
+    query = f"""
+            SELECT question_sort, COUNT("value") AS count, "value"::integer FROM reports.answer
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric'
+            GROUP BY question_sort, "value"
+            ORDER BY question_sort, "value"
+        """
+
+    cursor.execute(query)
+    data = cursor.fetchall()
+    for row in data:
+        if row[0] != question_sort:
+            total_data.append(f"[{', '.join([str(x) for x in question_scores])}]")
+            question_sort = row[0]
+            question_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        question_scores[row[2]-1] = row[1]
+
+    total_data.append(question_scores)   
+    
+    #LOADING ANSWER DETAILS (datatable display)
     #WARNING: place \\ before any single quote for row values and set '' for NULL
-    for i in range(100):
-        table_rows.append(f"""
-            '{table_columns[0]}': '227',
-            '{table_columns[1]}': '2021-04-08 19:29:40.328834+02',
-            '{table_columns[2]}': '2021',
-            '{table_columns[3]}': 'CF',
-            '{table_columns[4]}': 'Informàtica i comunicacions',
-            '{table_columns[5]}': 'DAM',
-            '{table_columns[6]}': 'DAM1',
-            '{table_columns[7]}': 'MP04',
-            '{table_columns[8]}': 'Llenguatges de marques i sistemes de gestió d\\'informació',
-            '{table_columns[9]}': '',
-            '{table_columns[10]}': 'Assignatura',
-            '{table_columns[11]}': '1',
-            '{table_columns[12]}': 'Numeric',
-            '{table_columns[13]}': 'Avalua la metodologia d\\'aprenentatge, l\\'organització de la classe i l\\'assistència rebuda.',
-            '{table_columns[14]}': '10'
-        """)
+    query = f"""
+            SELECT evaluation_id, timestamp, year, level, department, degree, "group", subject_code, subject_name, trainer, topic, question_sort, question_type, question_statement, 
+                CASE 
+		            WHEN TRIM("value") = '' THEN ''
+		        ELSE TRIM("value")
+	            END
+            FROM reports.answer
+            WHERE degree='{course_code}' AND subject_code='{mp_code}'
+            ORDER BY degree, subject_code, question_sort
+        """
 
+    cursor.execute(query)
+    data = cursor.fetchall()
+    replace = "\\'"
+    for row in data:           
         table_rows.append(f"""
-            '{table_columns[0]}': '227',
-            '{table_columns[1]}': '2021-04-08 19:29:40.328834+02',
-            '{table_columns[2]}': '2021',
-            '{table_columns[3]}': 'CF',
-            '{table_columns[4]}': 'Informàtica i comunicacions',
-            '{table_columns[5]}': 'DAM',
-            '{table_columns[6]}': 'DAM1',
-            '{table_columns[7]}': 'MP04',
-            '{table_columns[8]}': 'Llenguatges de marques i sistemes de gestió d\\'informació',
-            '{table_columns[9]}': '',
-            '{table_columns[10]}': 'Assignatura',
-            '{table_columns[11]}': '2',
-            '{table_columns[12]}': 'Numeric',
-            '{table_columns[13]}': 'Penses que la manera d\\'avaluar és l\\'adequada?',
-            '{table_columns[14]}': '10'
-        """)
-
-        table_rows.append(f"""
-            '{table_columns[0]}': '227',
-            '{table_columns[1]}': '2021-04-08 19:29:40.328834+02',
-            '{table_columns[2]}': '2021',
-            '{table_columns[3]}': 'CF',
-            '{table_columns[4]}': 'Informàtica i comunicacions',
-            '{table_columns[5]}': 'DAM',
-            '{table_columns[6]}': 'DAM1',
-            '{table_columns[7]}': 'MP04',
-            '{table_columns[8]}': 'Llenguatges de marques i sistemes de gestió d\\'informació',
-            '{table_columns[9]}': '',
-            '{table_columns[10]}': 'Assignatura',
-            '{table_columns[11]}': '3',
-            '{table_columns[12]}': 'Numeric',
-            '{table_columns[13]}': 'Penses que el que has après pot ser útil a la teva futura vida professional?',
-            '{table_columns[14]}': '10'
-        """)
-
-        table_rows.append(f"""
-            '{table_columns[0]}': '227',
-            '{table_columns[1]}': '2021-04-08 19:29:40.328834+02',
-            '{table_columns[2]}': '2021',
-            '{table_columns[3]}': 'CF',
-            '{table_columns[4]}': 'Informàtica i comunicacions',
-            '{table_columns[5]}': 'DAM',
-            '{table_columns[6]}': 'DAM1',
-            '{table_columns[7]}': 'MP04',
-            '{table_columns[8]}': 'Llenguatges de marques i sistemes de gestió d\\'informació',
-            '{table_columns[9]}': '',
-            '{table_columns[10]}': 'Assignatura',
-            '{table_columns[11]}': '4',
-            '{table_columns[12]}': 'Numeric',
-            '{table_columns[13]}': 'Penses que el material triat pel professor és l\\'adequat? (Llibre o apunts, Moodle, activitats, transparències, videotutorials, etc.)',
-            '{table_columns[14]}': '10'
-        """)
-
-        table_rows.append(f"""
-            '{table_columns[0]}': '227',
-            '{table_columns[1]}': '2021-04-08 19:29:40.328834+02',
-            '{table_columns[2]}': '2021',
-            '{table_columns[3]}': 'CF',
-            '{table_columns[4]}': 'Informàtica i comunicacions',
-            '{table_columns[5]}': 'DAM',
-            '{table_columns[6]}': 'DAM1',
-            '{table_columns[7]}': 'MP04',
-            '{table_columns[8]}': 'Llenguatges de marques i sistemes de gestió d\\'informació',
-            '{table_columns[9]}': '',
-            '{table_columns[10]}': 'Assignatura',
-            '{table_columns[11]}': '5',
-            '{table_columns[12]}': 'Text',
-            '{table_columns[13]}': 'Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)',
-            '{table_columns[14]}': 'This is the demo comment number {i+1}.'
-        """)
+            '{table_columns[0]}': '{row[0]}',
+            '{table_columns[1]}': '{row[1]}',
+            '{table_columns[2]}': '{row[2]}',
+            '{table_columns[3]}': '{row[3].replace("'", replace)}',
+            '{table_columns[4]}': '{row[4].replace("'", replace)}',
+            '{table_columns[5]}': '{row[5].replace("'", replace)}',
+            '{table_columns[6]}': '{row[6].replace("'", replace)}',
+            '{table_columns[7]}': '{row[7].replace("'", replace)}',
+            '{table_columns[8]}': '{row[8].replace("'", replace)}',
+            '{table_columns[9]}': '{row[9]}',
+            '{table_columns[10]}': '{row[10]}',
+            '{table_columns[11]}': '{row[11]}',
+            '{table_columns[12]}': '{row[12]}',
+            '{table_columns[13]}': '{row[13].replace("'", replace)}',
+            '{table_columns[14]}': '{row[14].replace("'", replace)}',
+        """.replace("'None'", "''").replace('\r', '').replace('\n', ''))
 
 def setup_data():
     global table_columns, legend_colors, legend_summary, legend_list, total_graph
@@ -364,7 +309,7 @@ def generate_file():
                         //This function hides the numeric answers in the comments table but allows exporting
                         function (settings, searchData, index, rowData, counter) {{
                             if(settings.sTableId == "export") return true;
-                            else return !(rowData["question_type"] === 'Numeric');                    
+                            else return !(rowData["question_type"] === 'Numeric' || rowData["value"] === '');                    
                     }});
                                             
                     const globalData = {{
@@ -529,7 +474,7 @@ def generate_file():
         sys.stdout = original_stdout
 
 #loading bbdd data
-load_data()
+load_data(31) #DAM MP04
 
 #setting up extra data
 setup_data()
