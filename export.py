@@ -4,12 +4,14 @@ from random import randrange
 import psycopg2
 import sys
 
+trainer = None
 course_code = ""
 mp_code = ""
 mp_name = ""
 comment_caption = ""
 
-table_columns = ["evaluation_id","timestamp","year","level","department","degree","group","subject_code","subject_name","trainer","topic","question_sort","question_type","question_statement","value"]
+conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes-real")
+table_columns = ["evaluation_id","timestamp","year","level","department","degree","group","subject_code","subject_name","topic","question_sort","question_type","question_statement","value"]
 global_data = []
 legend_text = []
 total_data = []
@@ -19,10 +21,29 @@ legend_summary = []
 legend_list = []
 total_graph = []
 
-def load_data(subject_id):
-    global course_code, mp_code, mp_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns
+def generate_zip():
+    global conn
+
+    cursor = conn.cursor()
+    query = f"""
+            SELECT sub.id AS subject_id, stg.trainer_id FROM master.subject sub
+            LEFT JOIN master.subject_trainer_group stg ON stg.subject_id = sub.id
+        """
     
-    conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes-real")
+    cursor.execute(query)
+    data = cursor.fetchall()    
+    for row in data:
+        #loading bbdd data
+        load_data(row[0], row[1])
+
+        #setting up extra data
+        setup_data()
+
+        #creating the HTML file
+        generate_file()
+
+def load_data(subject_id, trainer_id):
+    global trainer, course_code, mp_code, mp_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns, conn        
     cursor = conn.cursor()
 
     #LOADING MAIN COURSE DATA    
@@ -40,10 +61,19 @@ def load_data(subject_id):
     mp_code = data[0]
     mp_name = data[1]
 
+    #LOADING TRAINER DATA  
+    trainer = None
+    trainer_filter = "trainer is NULL"    
+    if trainer_id != None:
+        query = f"SELECT name FROM master.trainer WHERE id={trainer_id}"
+        cursor.execute(query)
+        trainer = cursor.fetchone()[0]
+        trainer_filter = f"trainer='{trainer}'"
+
     #LOADING GLOBAL SCORING DATA (score average per question)
     query = f"""
             SELECT question_statement, SUM(CAST(value AS INTEGER))/COUNT(question_statement) AS "value", question_sort FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric'
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter}
             GROUP BY question_statement, question_sort
             ORDER BY question_sort
         """
@@ -58,7 +88,7 @@ def load_data(subject_id):
         legend_text.append(row[0])
         global_data.append(row[1])                
 
-    query = f"SELECT DISTINCT question_statement FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Text'"
+    query = f"SELECT DISTINCT question_statement FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Text' AND {trainer_filter}"
     cursor.execute(query)
     comment_caption = cursor.fetchone()[0]
 
@@ -69,7 +99,7 @@ def load_data(subject_id):
     
     query = f"""
             SELECT question_sort, COUNT("value") AS count, "value"::integer FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric'
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter}
             GROUP BY question_sort, "value"
             ORDER BY question_sort, "value"
         """
@@ -89,13 +119,9 @@ def load_data(subject_id):
     #LOADING ANSWER DETAILS (datatable display)
     #WARNING: place \\ before any single quote for row values and set '' for NULL
     query = f"""
-            SELECT evaluation_id, timestamp, year, level, department, degree, "group", subject_code, subject_name, trainer, topic, question_sort, question_type, question_statement, 
-                CASE 
-		            WHEN TRIM("value") = '' THEN ''
-		        ELSE TRIM("value")
-	            END
+            SELECT evaluation_id, timestamp, year, level, department, degree, "group", subject_code, subject_name, topic, question_sort, question_type, question_statement, TRIM("value")               
             FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}'
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND {trainer_filter}
             ORDER BY degree, subject_code, question_sort
         """
 
@@ -107,18 +133,17 @@ def load_data(subject_id):
             '{table_columns[0]}': '{row[0]}',
             '{table_columns[1]}': '{row[1]}',
             '{table_columns[2]}': '{row[2]}',
-            '{table_columns[3]}': '{row[3].replace("'", replace)}',
-            '{table_columns[4]}': '{row[4].replace("'", replace)}',
-            '{table_columns[5]}': '{row[5].replace("'", replace)}',
-            '{table_columns[6]}': '{row[6].replace("'", replace)}',
-            '{table_columns[7]}': '{row[7].replace("'", replace)}',
-            '{table_columns[8]}': '{row[8].replace("'", replace)}',
+            '{table_columns[3]}': '{"" if row[3] is None else row[3].replace("'", replace)}',
+            '{table_columns[4]}': '{"" if row[4] is None else row[4].replace("'", replace)}',
+            '{table_columns[5]}': '{"" if row[5] is None else row[5].replace("'", replace)}',
+            '{table_columns[6]}': '{"" if row[6] is None else row[6].replace("'", replace)}',
+            '{table_columns[7]}': '{"" if row[7] is None else row[7].replace("'", replace)}',
+            '{table_columns[8]}': '{"" if row[8] is None else row[8].replace("'", replace)}',
             '{table_columns[9]}': '{row[9]}',
             '{table_columns[10]}': '{row[10]}',
             '{table_columns[11]}': '{row[11]}',
-            '{table_columns[12]}': '{row[12]}',
-            '{table_columns[13]}': '{row[13].replace("'", replace)}',
-            '{table_columns[14]}': '{row[14].replace("'", replace)}',
+            '{table_columns[12]}': '{"" if row[12] is None else row[12].replace("'", replace)}',
+            '{table_columns[13]}': '{"" if row[13] is None else row[13].replace("'", replace)}',
         """.replace("'None'", "''").replace('\r', '').replace('\n', ''))
 
 def setup_data():
@@ -468,16 +493,15 @@ def generate_file():
 
     original_stdout = sys.stdout
 
-    with open(f"dashboard_{mp_code}.html", "w", encoding="utf-8") as f:
+    filename = f"dashboard_{course_code}_{mp_code}"
+    if trainer != None: filename = f"{filename}_{trainer}"
+    filename = f"{filename}.html"
+
+    with open(filename, "w", encoding="utf-8") as f:
         sys.stdout = f
         print(template)
         sys.stdout = original_stdout
 
-#loading bbdd data
-load_data(31) #DAM MP04
 
-#setting up extra data
-setup_data()
-
-#creating the HTML file
-generate_file()
+#MAIN CALL
+generate_zip()
