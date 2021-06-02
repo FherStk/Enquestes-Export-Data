@@ -7,7 +7,7 @@ import psycopg2
 import sys
 import os
 
-folder = "export"
+folder = "dashboards"
 zip = None
 trainer = None
 course_code = ""
