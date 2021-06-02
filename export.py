@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 from random import randrange
+from zipfile import ZipFile
+from pathlib import Path
 import psycopg2
 import sys
+import os
 
+folder = "export"
+zip = None
 trainer = None
 course_code = ""
 mp_code = ""
@@ -22,8 +27,11 @@ legend_list = []
 total_graph = []
 
 def generate_zip():
-    global conn
-
+    global conn, zip
+        
+    Path(folder).mkdir(parents=True, exist_ok=True)
+    zip = ZipFile(f"{folder}/dashboards.zip", "w")    
+        
     cursor = conn.cursor()
     query = f"""
             SELECT sub.id AS subject_id, stg.trainer_id FROM master.subject sub
@@ -41,6 +49,9 @@ def generate_zip():
 
         #creating the HTML file
         generate_file()
+    
+    zip.close()
+
 
 def load_data(subject_id, trainer_id):
     global trainer, course_code, mp_code, mp_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns, conn        
@@ -493,7 +504,7 @@ def generate_file():
 
     original_stdout = sys.stdout
 
-    filename = f"dashboard_{course_code}_{mp_code}"
+    filename = f"{folder}/dashboard_{course_code}_{mp_code}"
     if trainer != None: filename = f"{filename}_{trainer}"
     filename = f"{filename}.html"
 
@@ -502,6 +513,8 @@ def generate_file():
         print(template)
         sys.stdout = original_stdout
 
+    zip.write(filename)
+    os.remove(filename)
 
 #MAIN CALL
 generate_zip()
