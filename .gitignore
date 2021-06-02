@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 dashboard.html
 dashboard_*.html
+export/dashboards.zip
