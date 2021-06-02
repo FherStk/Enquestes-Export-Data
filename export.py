@@ -129,13 +129,14 @@ def load_data(subject_id, trainer_id):
     
     #LOADING ANSWER DETAILS (datatable display)
     #WARNING: place \\ before any single quote for row values and set '' for NULL
+    table_rows = []
     query = f"""
             SELECT evaluation_id, timestamp, year, level, department, degree, "group", subject_code, subject_name, topic, question_sort, question_type, question_statement, TRIM("value")               
             FROM reports.answer
             WHERE degree='{course_code}' AND subject_code='{mp_code}' AND {trainer_filter}
             ORDER BY degree, subject_code, question_sort
         """
-
+    
     cursor.execute(query)
     data = cursor.fetchall()
     replace = "\\'"
