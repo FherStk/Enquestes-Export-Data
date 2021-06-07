@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 from random import randrange
+from datetime import date
 from zipfile import ZipFile
 from pathlib import Path
 import psycopg2
@@ -15,7 +16,7 @@ mp_code = ""
 mp_name = ""
 comment_caption = ""
 
-conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes-real")
+conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes")
 table_columns = ["evaluation_id","timestamp","year","level","department","degree","group","subject_code","subject_name","topic","question_sort","question_type","question_statement","value"]
 global_data = []
 legend_text = []
@@ -34,7 +35,8 @@ def generate_zip():
         
     cursor = conn.cursor()
     query = f"""
-            SELECT sub.id AS subject_id, stg.trainer_id FROM master.subject sub
+            SELECT sub.id AS subject_id, stg.trainer_id 
+            FROM master.subject sub
             LEFT JOIN master.subject_trainer_group stg ON stg.subject_id = sub.id
         """
     
@@ -83,8 +85,9 @@ def load_data(subject_id, trainer_id):
 
     #LOADING GLOBAL SCORING DATA (score average per question)
     query = f"""
-            SELECT question_statement, SUM(CAST(value AS INTEGER))/COUNT(question_statement) AS "value", question_sort FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter}
+            SELECT question_statement, SUM(CAST(value AS INTEGER))/COUNT(question_statement) AS "value", question_sort 
+            FROM reports.answer
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             GROUP BY question_statement, question_sort
             ORDER BY question_sort
         """
@@ -99,9 +102,13 @@ def load_data(subject_id, trainer_id):
         legend_text.append(row[0])
         global_data.append(row[1])                
 
-    query = f"SELECT DISTINCT question_statement FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Text' AND {trainer_filter}"
+    query = f"""
+            SELECT DISTINCT question_statement 
+            FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Text' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
+        """
     cursor.execute(query)
-    comment_caption = cursor.fetchone()[0]
+    data = cursor.fetchone()
+    comment_caption = "" if data is None else data[0]
 
     #LOADING TOTAL DATA (amount of scores per question)
     total_data = []
@@ -109,8 +116,9 @@ def load_data(subject_id, trainer_id):
     question_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     
     query = f"""
-            SELECT question_sort, COUNT("value") AS count, "value"::integer FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter}
+            SELECT question_sort, COUNT("value") AS count, "value"::integer 
+            FROM reports.answer
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             GROUP BY question_sort, "value"
             ORDER BY question_sort, "value"
         """
@@ -133,7 +141,7 @@ def load_data(subject_id, trainer_id):
     query = f"""
             SELECT evaluation_id, timestamp, year, level, department, degree, "group", subject_code, subject_name, topic, question_sort, question_type, question_statement, TRIM("value")               
             FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND {trainer_filter}
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             ORDER BY degree, subject_code, question_sort
         """
     
@@ -187,7 +195,7 @@ def setup_data():
 
     #total data graph
     total_graph = []
-    for i in range(len(total_data)):
+    for i in range(len(legend_text)):
         total_graph.append(f"""
             'label': '{legend_summary[i]}',
             'data':  {total_data[i]},
@@ -360,7 +368,7 @@ def generate_file():
                     }};
 
                     const totalData = {{
-                        labels:  [{(', '.join("'" + str(item) + "'" for item in range(10)))}],
+                        labels:  [{(', '.join("'" + str(item) + "'" for item in range(1, 11)))}],
                         datasets:  [{(', '.join('{' + item + '}' for item in total_graph))}]
                     }};
 
