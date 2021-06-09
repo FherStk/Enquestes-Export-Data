@@ -197,7 +197,7 @@ def setup_data():
     total_graph = []
     for i in range(len(legend_text)):
         total_graph.append(f"""
-            'label': '{legend_summary[i]}',
+            'label': 'Quantitat de valoracions en {legend_summary[i].lower()}',
             'data':  {total_data[i]},
             'backgroundColor': '{legend_colors[i]}',
             'borderColor': '{legend_colors[i]}'
@@ -361,28 +361,45 @@ def generate_file():
                         labels:  [{(', '.join('"' + item + '"' for item in legend_summary))}],
                         datasets: [
                             {{
+                                label: 'Valoració mitjana',
                                 data:  [{(', '.join("'" + str(item) + "'" for item in global_data))}],
-                                backgroundColor: [{(', '.join('"' + item + '"' for item in legend_colors))}]
+                                backgroundColor: [{(', '.join('"' + item + '"' for item in legend_colors))}],
+                                borderColor: [{(', '.join('"' + item + '"' for item in legend_colors))}]
                             }}
                         ]
                     }};
 
                     const totalData = {{
-                        labels:  [{(', '.join("'" + str(item) + "'" for item in range(1, 11)))}],
+                        labels:  [{(', '.join("'" + str(item) + (" punt" if item == 1 else " punts") + "'" for item in range(1, 11)))}],
                         datasets:  [{(', '.join('{' + item + '}' for item in total_graph))}]
                     }};
 
                     var fullData = [{(', '.join('{' + item + '}' for item in table_rows))}];
                 
                     var globalChart = new Chart(document.getElementById('globalChart'), {{
-                        type: 'polarArea',
+                        type: 'bar',
                         data: globalData,                
                         options: {{                    
                             responsive: true,
                             maintainAspectRatio: false,
+                            scales: {{
+                                x:{{
+                                    title: {{
+                                        display: true,
+                                        text: 'Pregunta'
+                                    }}
+                                }},
+                                y:{{
+                                    suggestedMin: 0,
+                                    suggestedMax: 10,
+                                    title: {{
+                                        display: true,
+                                        text: 'Mitjana de valoracions'
+                                    }}
+                                }}
+                            }},
                             plugins: {{
                                 legend: {{
-                                    //position: 'left'
                                     display: false
                                 }}
                             }}
@@ -442,7 +459,7 @@ def generate_file():
 
                         document.querySelectorAll('canvas').forEach((chartItem,index)=>{{
                             var chart = Chart.instances[index];
-                            if(chart.config.type == "polarArea") chart.toggleDataVisibility(legendItemIndex);
+                            if(chart.canvas.id == "globalChart") chart.toggleDataVisibility(legendItemIndex);
                             else  chart.data.datasets[legendItemIndex].hidden = !(chart.data.datasets[legendItemIndex].hidden ?? false);                    
                             chart.update();                    
                         }});  
@@ -466,14 +483,14 @@ def generate_file():
 
             <div class="content">    
                 <div class="box left">
-                    <h3>Valoracions totals</h3>
+                    <h3>Valoracions totals (quantitat de puntuacions per pregunta)</h3>
                     <div class="canvas">
                         <canvas id="totalChart"></canvas>
                     </div>
                 </div>
 
                 <div class="box right">
-                    <h3>Valoracions globals</h3>
+                    <h3>Valoracions globals (mitjana de valoracions per pregunta)</h3>
                     <div class="canvas">
                         <canvas id="globalChart"></canvas>
                     </div>

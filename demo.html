@@ -164,7 +164,7 @@
                                     'rgb(54, 162, 235, 0.25)'
                                 ],
                                 'borderColor': [
-                                'rgb(255, 99, 132, 0.25)',
+                                    'rgb(255, 99, 132, 0.25)',
                                     'rgb(75, 192, 192, 0.25)',
                                     'rgb(255, 205, 86, 0.25)',
                                     'rgb(54, 162, 235, 0.25)'
@@ -8218,6 +8218,8 @@
                                     }
                                 },
                                 y:{
+                                    suggestedMin: 0,
+                                    suggestedMax: 10,
                                     title: {
                                         display: true,
                                         text: 'Mitjana de valoracions'
@@ -8227,17 +8229,6 @@
                             plugins: {
                                 legend: {
                                     display: false
-                                },
-                                tooltip: {
-                                    enabled: true,
-                                    interaction: {
-                                        mode: 'point'
-                                    }
-                                },
-                                datalabels: {
-                                    display: function(context) {
-                                        return context.dataset.data[context.dataIndex] !== 0; // or >= 1 or ...
-                                    }
                                 }
                             }
                         },
@@ -8320,14 +8311,14 @@
 
             <div class="content">    
                 <div class="box left">
-                    <h3>Valoracions totals</h3>
+                    <h3>Valoracions totals (quantitat de puntuacions per pregunta)</h3>
                     <div class="canvas">
                         <canvas id="totalChart"></canvas>
                     </div>
                 </div>
 
                 <div class="box right">
-                    <h3>Valoracions globals</h3>
+                    <h3>Valoracions globals (mitjana de valoracions per pregunta)</h3>
                     <div class="canvas">
                         <canvas id="globalChart"></canvas>
                     </div>
