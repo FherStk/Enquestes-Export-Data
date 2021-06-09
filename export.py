@@ -362,7 +362,7 @@ def generate_file():
                         datasets: [
                             {{
                                 label: 'Valoració mitjana',
-                                data:  [{(', '.join("'" + str(item) + "'" for item in global_data))}],
+                                data:  [{(', '.join("'" + str(round(item, 2)) + "'" for item in global_data))}],
                                 backgroundColor: [{(', '.join('"' + item + '"' for item in legend_colors))}],
                                 borderColor: [{(', '.join('"' + item + '"' for item in legend_colors))}]
                             }}
