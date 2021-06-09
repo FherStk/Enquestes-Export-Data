@@ -85,7 +85,7 @@ def load_data(subject_id, trainer_id):
 
     #LOADING GLOBAL SCORING DATA (score average per question)
     query = f"""
-            SELECT question_statement, SUM(CAST(value AS INTEGER))/COUNT(question_statement) AS "value", question_sort 
+            SELECT question_statement, SUM(CAST(value AS FLOAT))/COUNT(question_statement) AS "value", question_sort 
             FROM reports.answer
             WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             GROUP BY question_statement, question_sort
