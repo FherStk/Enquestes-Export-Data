@@ -150,13 +150,25 @@
                             if(settings.sTableId == "export") return true;
                             else return !(rowData["question_type"] === 'Numeric');                    
                     });
-                                            
+                                                                
                     const globalData = {
-                        labels:  ["Pregunta 1", "Pregunta 2", "Pregunta 3", "Pregunta 4", "<div class=icon style=background-color: {legend_colors[o]};></div>{legend_text[i]}", "<div class=icon style=background-color: {legend_colors[o]};></div>{legend_text[i]}", "<div class=icon style=background-color: {legend_colors[o]};></div>{legend_text[i]}", "<div class=icon style=background-color: {legend_colors[o]};></div>{legend_text[i]}"],
-                        datasets: [
+                        labels:  ['1', '2', '3', '4'],
+                        datasets:  [
                             {
-                                data:  ['9.75', '8.25', '7', '9'],
-                                backgroundColor: ["rgb(255, 99, 132, 0.25)", "rgb(75, 192, 192, 0.25)", "rgb(255, 205, 86, 0.25)", "rgb(54, 162, 235, 0.25)"]
+                                'label': 'Pregunta',
+                                'data':  [9.75, 8.25, 7.0, 9.1],
+                                'backgroundColor': [
+                                    'rgb(255, 99, 132, 0.25)',
+                                    'rgb(75, 192, 192, 0.25)',
+                                    'rgb(255, 205, 86, 0.25)',
+                                    'rgb(54, 162, 235, 0.25)'
+                                ],
+                                'borderColor': [
+                                'rgb(255, 99, 132, 0.25)',
+                                    'rgb(75, 192, 192, 0.25)',
+                                    'rgb(255, 205, 86, 0.25)',
+                                    'rgb(54, 162, 235, 0.25)'
+                                ]
                             }
                         ]
                     };
@@ -164,30 +176,32 @@
                     const totalData = {
                         labels:  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
                         datasets:  [
-                        {
-                            'label': 'Pregunta 1',
-                            'data':  [0, 0, 0, 1, 0, 2, 7, 5, 3],
-                            'backgroundColor': 'rgb(255, 99, 132, 0.25)',
-                            'borderColor': 'rgb(255, 99, 132, 0.25)'
-                        }, {
-                            'label': 'Pregunta 2',
-                            'data':  [0, 1, 0, 0, 0, 3, 6, 3, 4],
-                            'backgroundColor': 'rgb(75, 192, 192, 0.25)',
-                            'borderColor': 'rgb(75, 192, 192, 0.25)'
-                        }, {
-                            'label': 'Pregunta 3',
-                            'data':  [0, 0, 0, 0, 0, 3, 4, 8, 1],
-                            'backgroundColor': 'rgb(255, 205, 86, 0.25)',
-                            'borderColor': 'rgb(255, 205, 86, 0.25)'
-                        }, {
-                            'label': 'Pregunta 4',
-                            'data':  [0, 1, 0,2, 0, 2, 2, 9, 1],
-                            'backgroundColor': 'rgb(54, 162, 235, 0.25)',
-                            'borderColor': 'rgb(54, 162, 235, 0.25)'
-                        }]
-                                    };
+                            {
+                                'label': 'Pregunta 1',
+                                'data':  [0, 0, 0, 1, 0, 2, 7, 5, 3],
+                                'backgroundColor': 'rgb(255, 99, 132, 0.25)',
+                                'borderColor': 'rgb(255, 99, 132, 0.25)'
+                            }, {
+                                'label': 'Pregunta 2',
+                                'data':  [0, 1, 0, 0, 0, 3, 6, 3, 4],
+                                'backgroundColor': 'rgb(75, 192, 192, 0.25)',
+                                'borderColor': 'rgb(75, 192, 192, 0.25)'
+                            }, {
+                                'label': 'Pregunta 3',
+                                'data':  [0, 0, 0, 0, 0, 3, 4, 8, 1],
+                                'backgroundColor': 'rgb(255, 205, 86, 0.25)',
+                                'borderColor': 'rgb(255, 205, 86, 0.25)'
+                            }, {
+                                'label': 'Pregunta 4',
+                                'data':  [0, 1, 0,2, 0, 2, 2, 9, 1],
+                                'backgroundColor': 'rgb(54, 162, 235, 0.25)',
+                                'borderColor': 'rgb(54, 162, 235, 0.25)'
+                            }
+                        ]
+                    };
 
-                                    var fullData = [{
+                    var fullData = [
+                        {
                             'evaluation_id': '227',
                             'timestamp': '2021-04-08 19:29:40.328834+02',
                             'year': '2021',
@@ -8188,18 +8202,42 @@
                             'question_statement': 'Si us plau, fes una proposta per millorar el mòdul. (Opcional, però molt important si penses que hi ha coses per polir. Longitud màxima: 280 caràcters.)',
                             'value': 'This is the demo comment number 100.'
                         }
-                    ];
-                
+                    ];            
+
                     var globalChart = new Chart(document.getElementById('globalChart'), {
-                        type: 'polarArea',
+                        type: 'bar',
                         data: globalData,                
                         options: {                    
                             responsive: true,
                             maintainAspectRatio: false,
+                            scales: {
+                                x:{
+                                    title: {
+                                        display: true,
+                                        text: 'Pregunta'
+                                    }
+                                },
+                                y:{
+                                    title: {
+                                        display: true,
+                                        text: 'Mitjana de valoracions'
+                                    }
+                                }
+                            },
                             plugins: {
                                 legend: {
-                                    //position: 'left'
                                     display: false
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    interaction: {
+                                        mode: 'point'
+                                    }
+                                },
+                                datalabels: {
+                                    display: function(context) {
+                                        return context.dataset.data[context.dataIndex] !== 0; // or >= 1 or ...
+                                    }
                                 }
                             }
                         },
@@ -8257,12 +8295,12 @@
                         legendItem.classList.toggle("cross");
 
                         document.querySelectorAll('canvas').forEach((chartItem,index)=>{
-                            var chart = Chart.instances[index];
-                            if(chart.config.type == "polarArea") chart.toggleDataVisibility(legendItemIndex);
+                            var chart = Chart.instances[index];                            
+                            if(chart.canvas.id == "globalChart") chart.toggleDataVisibility(legendItemIndex);
                             else  chart.data.datasets[legendItemIndex].hidden = !(chart.data.datasets[legendItemIndex].hidden ?? false);                    
-                            chart.update();                    
+                            chart.update();                                                
                         });  
-                    }
+                    } 
                 };         
             </script>
         <head>
