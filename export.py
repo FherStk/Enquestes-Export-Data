@@ -444,7 +444,7 @@ def generate_file():
                         data: fullData,
                         columns: [{(', '.join('{data: "' + item + '"}' for item in table_columns))}],                   
                         dom: 'Bfrtip',
-                        buttons: ['copy', 'excel', 'pdf']            
+                        buttons: ['copy', 'excel'/*, 'pdf'*/]            
                     }});
                     
                     var legendItems = document.querySelector('#legend').getElementsByTagName('li');
