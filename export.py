@@ -14,6 +14,7 @@ trainer = None
 course_code = ""
 mp_code = ""
 mp_name = ""
+group_name = ""
 comment_caption = ""
 
 conn = psycopg2.connect(user="postgres", password="postgres", host="127.0.0.1", port="5432", database="enquestes")
@@ -34,17 +35,30 @@ def generate_zip():
     zip = ZipFile(f"{folder}/dashboards.zip", "w")    
         
     cursor = conn.cursor()
+
+    #Query with merged groups
+    # query = f"""
+    #         SELECT sub.id AS subject_id, stg.trainer_id 
+    #         FROM master.subject sub
+    #         LEFT JOIN master.subject_trainer_group stg ON stg.subject_id = sub.id
+    #     """
+    
+    #Query with separated groups
     query = f"""
-            SELECT sub.id AS subject_id, stg.trainer_id 
-            FROM master.subject sub
-            LEFT JOIN master.subject_trainer_group stg ON stg.subject_id = sub.id
-        """
+        SELECT DISTINCT ss.subject_id, stg.trainer_id, gr.name AS "group"
+        FROM master.subject_student ss
+        LEFT JOIN master.student st ON ss.student_id = st.id
+        LEFT JOIN master.group gr ON st.group_id = gr.id
+        LEFT JOIN master.subject_trainer_group stg ON ((ss.subject_id = stg.subject_id AND gr.id = stg.group_id) OR (ss.subject_id = stg.subject_id AND stg.group_id IS NULL))
+        ORDER BY ss.subject_id
+    """
+
     
     cursor.execute(query)
     data = cursor.fetchall()    
     for row in data:
         #loading bbdd data
-        load_data(row[0], row[1])
+        load_data(row[0], row[1], row[2])
 
         #setting up extra data
         setup_data()
@@ -55,8 +69,8 @@ def generate_zip():
     zip.close()
 
 
-def load_data(subject_id, trainer_id):
-    global trainer, course_code, mp_code, mp_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns, conn        
+def load_data(subject_id, trainer_id, group):
+    global trainer, course_code, mp_code, mp_name, group_name, global_data, legend_text, total_data, table_rows, comment_caption, table_columns, conn        
     cursor = conn.cursor()
 
     #LOADING MAIN COURSE DATA    
@@ -73,6 +87,7 @@ def load_data(subject_id, trainer_id):
     course_code = data[2]
     mp_code = data[0]
     mp_name = data[1]
+    group_name = group
 
     #LOADING TRAINER DATA  
     trainer = None
@@ -87,7 +102,7 @@ def load_data(subject_id, trainer_id):
     query = f"""
             SELECT question_statement, SUM(CAST(value AS FLOAT))/COUNT(question_statement) AS "value", question_sort 
             FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND "group"='{group}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             GROUP BY question_statement, question_sort
             ORDER BY question_sort
         """
@@ -104,7 +119,7 @@ def load_data(subject_id, trainer_id):
 
     query = f"""
             SELECT DISTINCT question_statement 
-            FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Text' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
+            FROM reports.answer WHERE degree='{course_code}' AND subject_code='{mp_code}' AND "group"='{group}' AND question_type='Text' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
         """
     cursor.execute(query)
     data = cursor.fetchone()
@@ -118,7 +133,7 @@ def load_data(subject_id, trainer_id):
     query = f"""
             SELECT question_sort, COUNT("value") AS count, "value"::integer 
             FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND "group"='{group}' AND question_type='Numeric' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             GROUP BY question_sort, "value"
             ORDER BY question_sort, "value"
         """
@@ -141,7 +156,7 @@ def load_data(subject_id, trainer_id):
     query = f"""
             SELECT evaluation_id, timestamp, year, level, department, degree, "group", subject_code, subject_name, topic, question_sort, question_type, question_statement, TRIM("value")               
             FROM reports.answer
-            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
+            WHERE degree='{course_code}' AND subject_code='{mp_code}' AND "group"='{group}' AND {trainer_filter} AND EXTRACT(YEAR FROM "timestamp") = {date.today().year}
             ORDER BY degree, subject_code, question_sort
         """
     
@@ -211,7 +226,7 @@ def generate_file():
             <meta charset="UTF-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Dashboard for {mp_code}</title>
+            <title>Dashboard for {mp_code}: {mp_name} ({group_name})</title>
 
             <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.3.1/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/kt-2.6.1/r-2.2.7/sp-1.2.2/datatables.min.css"/>
 
@@ -471,7 +486,7 @@ def generate_file():
         <body>
             <header>
                 <h1>{course_code}</h1>
-                <h2>{mp_code}: {mp_name}</h2>
+                <h2>{mp_code}: {mp_name} ({group_name})</h2>
             </header>
 
             <div class="box full">
@@ -530,7 +545,7 @@ def generate_file():
 
     original_stdout = sys.stdout
 
-    filename = f"{folder}/dashboard_{course_code}_{mp_code}"
+    filename = f"{folder}/dashboard_{course_code}_{mp_code}_{group_name}"
     if trainer != None: filename = f"{filename}_{trainer}"
     filename = f"{filename}.html"
 
