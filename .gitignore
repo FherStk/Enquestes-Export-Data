@@ -130,3 +130,24 @@ dmypy.json
 dashboard.html
 dashboard_*.html
 dashboards/*
+
+# VS Code editor data
+.vscode/*
+.vscode
+
+# macOS-related
+.DS_Store
+.AppleDouble
+.LSOverride
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
